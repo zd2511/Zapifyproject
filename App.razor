@@ -1,0 +1,10 @@
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <section class="not-found"><span class="eyebrow">SIGNAL LOST</span><h1>This sector is unmapped.</h1><a href="/">Return to nexus ↗</a></section>
+        </LayoutView>
+    </NotFound>
+</Router>
