@@ -1,0 +1,111 @@
+@page "/"
+@implements IDisposable
+@inject UniverseState Universe
+<PageTitle>Verdant Nexus — Explore the living unknown</PageTitle>
+
+<main class="dashboard">
+    <aside class="rail">
+        <div class="rail-label">NAVIGATION</div>
+        <button class="rail-item active" title="Overview"><span>◈</span><small>OVERVIEW</small></button>
+        <button class="rail-item" title="Worlds" @onclick="ScrollWorlds"><span>◎</span><small>WORLDS</small></button>
+        <button class="rail-item" title="Telemetry" @onclick="() => Universe.ToggleDiagnostics()"><span>⌁</span><small>DATA</small></button>
+        <div class="rail-spacer"></div>
+        <button class="rail-item" title="Settings" @onclick="OpenSettings"><span>⚙</span><small>SETTINGS</small></button>
+    </aside>
+
+    <section class="content">
+        <div class="hero-copy">
+            <div class="eyebrow"><span class="eyebrow-line"></span> AN INTERACTIVE DIGITAL ECOSYSTEM</div>
+            <h1>Enter the<br /><em>living unknown.</em></h1>
+            <p class="hero-description">A breathing world of data, light and wild systems. Tune into distant biomes, study their rhythms, and discover what thrives beyond the familiar.</p>
+            <div class="hero-actions">
+                <button class="primary-button" @onclick="BeginScan"><span>⌕</span> INITIATE DEEP SCAN <b>↗</b></button>
+                <button class="quiet-button" @onclick="ScrollWorlds">EXPLORE WORLDS <span>↓</span></button>
+            </div>
+            <div class="hero-meta"><span><b>03</b> DISCOVERED WORLDS</span><span class="meta-divider"></span><span><b>98.4%</b> NETWORK HEALTH</span></div>
+        </div>
+
+        <div class="planet-scene @((Universe.ReducedMotion ? "motion-off" : ""))" style="--world-accent:@Universe.ActiveWorld.Accent;--grid-display:@(Universe.GridOverlay ? "block" : "none")">
+            <div class="scene-stars"></div>
+            <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+            <div class="planet-halo"></div>
+            <div class="planet">
+                <div class="planet-shade"></div><div class="planet-continent c-one"></div><div class="planet-continent c-two"></div><div class="planet-continent c-three"></div>
+                <div class="planet-atmosphere"></div>
+            </div>
+            <div class="moon"></div>
+            <div class="scene-grid"></div>
+            <div class="scene-label label-top"><span class="tiny-dot"></span> LIVE ENVIRONMENT <b>01 / 03</b></div>
+            <div class="scene-label label-bottom"><span>LAT 44.82° N</span><span>LONG 08.31° E</span><span class="scene-coordinate">⌖ @Universe.ActiveWorld.Code</span></div>
+            <div class="scene-callout"><span class="callout-line"></span><div><small>ACTIVE BIOME</small><strong>@Universe.ActiveWorld.Name</strong><span>@Universe.ActiveWorld.Climate</span></div></div>
+            <div class="scene-index">N° 0@((Array.IndexOf(Universe.Presets, Universe.ActiveWorld) + 1))</div>
+        </div>
+
+        <section class="metrics-row">
+            <div class="metric-heading"><span class="eyebrow">WORLD TELEMETRY</span><span class="refresh-tag"><span class="live-dot"></span> LIVE FEED</span></div>
+            <div class="metric-card"><div class="metric-top"><span>BIODIVERSITY INDEX</span><span class="metric-icon">✳</span></div><div class="metric-value">@Universe.ActiveWorld.Life<span class="metric-unit">/100</span></div><div class="metric-track"><span style="width:@(Universe.ActiveWorld.Life)%"></span></div><div class="metric-foot"><span>+4.8% THIS CYCLE</span><span class="trend-up">↗</span></div></div>
+            <div class="metric-card"><div class="metric-top"><span>FIELD STABILITY</span><span class="metric-icon">⌁</span></div><div class="metric-value">@Universe.ActiveWorld.Stability<span class="metric-unit">%</span></div><div class="metric-track"><span style="width:@(Universe.ActiveWorld.Stability)%"></span></div><div class="metric-foot"><span>WITHIN PARAMETERS</span><span class="trend-up">↗</span></div></div>
+            <div class="metric-card"><div class="metric-top"><span>RENEWABLE OUTPUT</span><span class="metric-icon">ϟ</span></div><div class="metric-value">@Universe.ActiveWorld.Energy<span class="metric-unit">MW</span></div><div class="metric-track"><span style="width:@(Universe.ActiveWorld.Energy)%"></span></div><div class="metric-foot"><span>GRID EFFICIENCY</span><span class="trend-up">↗</span></div></div>
+        </section>
+
+        <section class="world-section" id="worlds">
+            <div class="section-heading"><div><div class="eyebrow">CHOOSE YOUR FREQUENCY</div><h2>Worlds worth <em>wondering about.</em></h2></div><span class="section-count">01 — 03 <span> / AVAILABLE</span></span></div>
+            <div class="world-cards">
+                @foreach (var world in Universe.Presets)
+                {
+                    <button class="world-card @(Universe.ActiveWorld == world ? "selected" : "")" @onclick="() => Universe.SelectWorld(world)" style="--world-accent:@world.Accent">
+                        <div class="world-art @world.Code.ToLowerInvariant()"><span class="art-orbit"></span><span class="art-planet"></span><span class="art-moon"></span><span class="art-number">@world.Code</span></div>
+                        <div class="world-card-body"><div class="world-card-title"><strong>@world.Name</strong><span>↗</span></div><p>@world.Subtitle</p><div class="world-card-foot"><span>@world.Climate</span><span class="select-indicator">@(Universe.ActiveWorld == world ? "CONNECTED ✓" : "CONNECT +")</span></div></div>
+                    </button>
+                }
+            </div>
+        </section>
+
+        @if (Universe.Diagnostics)
+        {
+            <section class="diagnostics">
+                <div class="eyebrow">ADVANCED DIAGNOSTICS / C# STATE STREAM</div>
+                <div class="diagnostic-grid"><div><small>SCAN COUNT</small><strong>@Universe.ScanCount</strong></div><div><small>ACTIVE SECTOR</small><strong>@Universe.ActiveWorld.Code</strong></div><div><small>RENDER MODE</small><strong>@(Universe.ReducedMotion ? "LOW MOTION" : "AMBIENT")</strong></div><div><small>LINK STATUS</small><strong class="good">ENCRYPTED / OK</strong></div></div>
+            </section>
+        }
+    </section>
+</main>
+
+@if (settingsOpen)
+{
+    <div class="modal-backdrop" @onclick="CloseSettings">
+        <section class="settings-panel" @onclick:stopPropagation="true">
+            <div class="settings-head"><div><div class="eyebrow">PERSONALIZE YOUR FIELD</div><h2>System <em>settings.</em></h2></div><button class="close-button" @onclick="CloseSettings">×</button></div>
+            <div class="setting-row"><div><strong>Ambient soundscape</strong><p>Enable a gentle synthesized field tone.</p></div><button class="toggle @(Universe.AmbientAudio ? "on" : "")" @onclick="ToggleAudio"><span></span></button></div>
+            <div class="setting-row"><div><strong>Motion effects</strong><p>Reduce motion for a calmer experience.</p></div><button class="toggle @(Universe.ReducedMotion ? "on" : "")" @onclick="ToggleMotion"><span></span></button></div>
+            <div class="setting-row"><div><strong>Navigation grid</strong><p>Display the scene's coordinate mesh.</p></div><button class="toggle @(Universe.GridOverlay ? "on" : "")" @onclick="ToggleGrid"><span></span></button></div>
+            <div class="setting-note">SETTINGS APPLY IN REAL TIME · STORED FOR THIS SESSION</div>
+        </section>
+    </div>
+}
+@if (toast is not null)
+{
+    <div class="toast"><span class="live-dot"></span><div><b>@toast</b><small>FIELD NETWORK RESPONSE RECEIVED</small></div><button @onclick="() => toast = null">×</button></div>
+}
+@if (Universe.SecretUnlocked)
+{
+    <div class="easter-egg"><span>✳</span><div><b>THE SEVENTH SIGNAL</b><p>You found the hidden frequency. The universe was listening.</p></div><button @onclick="DismissSecret">×</button></div>
+}
+
+@code {
+    private bool settingsOpen;
+    private string? toast;
+    protected override void OnInitialized() => Universe.Changed += OnUniverseChanged;
+    private void OnUniverseChanged() => InvokeAsync(StateHasChanged);
+    private void OpenSettings() => settingsOpen = true;
+    private void CloseSettings() => settingsOpen = false;
+    private void ToggleAudio() { Universe.ToggleAudio(); toast = Universe.AmbientAudio ? "Ambient signal enabled" : "Ambient signal muted"; }
+    private void ToggleMotion() => Universe.ToggleMotion();
+    private void ToggleGrid() => Universe.ToggleGrid();
+    private void BeginScan() { Universe.Scan(); toast = $"Deep scan #{Universe.ScanCount:00} complete"; }
+    private void ScrollWorlds() => JSScroll("worlds");
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    private async void JSScroll(string id) => await JS.InvokeVoidAsync("vn.scrollTo", id);
+    private void DismissSecret() { toast = "Frequency acknowledged"; }
+    public void Dispose() => Universe.Changed -= OnUniverseChanged;
+}
